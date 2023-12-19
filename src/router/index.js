@@ -74,7 +74,7 @@ export const constantRoutes = [
         path: 'password',
         name: 'Password',
         component: () => import('@/views/password/index'),
-        meta: { title: '密码管理', icon: 'password' }
+        meta: { title: '资源管理', icon: 'password' }
       }
     ]
   },
