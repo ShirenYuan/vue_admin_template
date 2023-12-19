@@ -46,13 +46,49 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/home',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      path: 'home',
+      name: 'Home',
+      component: () => import('@/views/home/index'),
+      meta: { title: '公司管理', icon: 'dashboard' }
     }]
+  },
+  {
+    path: '/notice',
+    component: Layout,
+    children: [
+      {
+        path: 'notice',
+        name: 'Notice',
+        component: () => import('@/views/notice/index'),
+        meta: { title: '公告管理', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/password',
+    component: Layout,
+    children: [
+      {
+        path: 'password',
+        name: 'Password',
+        component: () => import('@/views/password/index'),
+        meta: { title: '密码管理', icon: 'password' }
+      }
+    ]
+  },
+  {
+    path: '/users',
+    component: Layout,
+    children: [
+      {
+        path: 'users',
+        name: 'Users',
+        component: () => import('@/views/users/index'),
+        meta: { title: '个人设置', icon: 'user' }
+      }
+    ]
   },
 
   {
