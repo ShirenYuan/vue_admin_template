@@ -31,14 +31,25 @@ module.exports = {
   // 关闭eslint
   lintOnSave: false,
   productionSourceMap: false,
+  // devServer: {
+  //   port: port,
+  //   open: true,
+  //   overlay: {
+  //     warnings: false,
+  //     errors: true
+  //   },
+  //   before: require('./mock/mock-server.js')
+  // },
   devServer: {
-    port: port,
-    open: true,
-    overlay: {
-      warnings: false,
-      errors: true
-    },
-    before: require('./mock/mock-server.js')
+    proxy: {
+      '/shen-hua': {
+        target: 'http://101.37.24.92',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/shen-hua': '/shen-hua'
+        }
+      }
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

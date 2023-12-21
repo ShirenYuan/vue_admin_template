@@ -13,7 +13,7 @@
         <el-input
           ref="username"
           v-model="loginForm.username"
-          placeholder="Username"
+          placeholder="请输入用户名"
           name="username"
           type="text"
           tabindex="1"
@@ -30,7 +30,7 @@
           ref="password"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
+          placeholder="请输入密码"
           name="password"
           tabindex="2"
           auto-complete="on"
@@ -41,12 +41,32 @@
         </span>
       </el-form-item>
 
+      <el-form-item prop="code">
+        <!-- <span class="svg-container">
+          <svg-icon icon-class="code" />
+        </span> -->
+        <el-input
+          ref="code"
+          v-model="loginForm.code"
+          placeholder="请输入验证码"
+          name="code"
+          type="text"
+          tabindex="3"
+          auto-complete="on"
+        />
+
+      </el-form-item>
+      <div style="display: flex;color: #fff;line-height: 1;align-items: center;margin-bottom: 20px;">
+        <div>验证码：</div>
+        <img :src="imageData" alt="" @click="getCaptcha()">
+      </div>
+
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
-      <div class="tips">
+      <!-- <div class="tips">
         <span style="margin-right:20px;">username: admin</span>
         <span> password: any</span>
-      </div>
+      </div> -->
 
     </el-form>
   </div>
@@ -54,20 +74,29 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import { getCode,login } from '@/api/user'
+import axios from 'axios';
 
 export default {
   name: 'Login',
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('用户名错误'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('请输入不少于6位密码'))
+      } else {
+        callback()
+      }
+    }
+    const validateCode = (rule, value, callback) => {
+      if (value.length < 4) {
+        callback(new Error('请输入不少于4位验证码'))
       } else {
         callback()
       }
@@ -75,15 +104,19 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '123455',
+        code: "",
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        code: [{ required: true, trigger: 'blur', validator: validateCode }],
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      imageData: "",//
+      uuid: "",
     }
   },
   watch: {
@@ -94,7 +127,55 @@ export default {
       immediate: true
     }
   },
+  mounted(){
+    this.getCaptcha()
+  },
   methods: {
+
+    // 在某个方法中获取图形验证码
+    async getCaptcha() {
+      var that = this;
+      var uuid = that.generateRandomString()
+      that.uuid = uuid
+      try {
+        const response = await axios.get('http://101.37.24.92/shen-hua/show/captcha.jpg', {
+          params: {
+            uuid: uuid
+          },
+          responseType: 'arraybuffer' // 以二进制形式接收响应数据
+        });
+
+        // 处理获取到的图形验证码，例如显示在页面上
+        that.imageData = 'data:image/jpeg;base64,' + Buffer.from(response.data, 'binary').toString('base64');
+        console.log(that.imageData)
+        // imageData 可以绑定到图片的 src 属性，显示在页面上
+      } catch (error) {
+        console.error('获取图形验证码失败', error);
+      }
+    },
+    getCodeFun(){
+      var that = this;
+      var params = {
+        uuid: that.generateRandomString()
+      }
+      getCode(params).then(res=>{
+        console.log(res)
+      })
+    },
+    loginFun(){
+
+    },
+    generateRandomString() {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let randomString = '';
+
+      for (let i = 0; i < 6; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        randomString += characters.charAt(randomIndex);
+      }
+
+      return randomString;
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -106,9 +187,11 @@ export default {
       })
     },
     handleLogin() {
+      var that = this;
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          this.loginForm.uuid = that.uuid
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
