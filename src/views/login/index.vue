@@ -6,15 +6,15 @@
         <h3 class="title">Login Form</h3>
       </div>
 
-      <el-form-item prop="username">
+      <el-form-item prop="account">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
+          ref="account"
+          v-model="loginForm.account"
           placeholder="请输入用户名"
-          name="username"
+          name="account"
           type="text"
           tabindex="1"
           auto-complete="on"
@@ -41,15 +41,15 @@
         </span>
       </el-form-item>
 
-      <el-form-item prop="code">
+      <el-form-item prop="imageCode">
         <!-- <span class="svg-container">
-          <svg-icon icon-class="code" />
+          <svg-icon icon-class="imageCode" />
         </span> -->
         <el-input
-          ref="code"
-          v-model="loginForm.code"
+          ref="imageCode"
+          v-model="loginForm.imageCode"
           placeholder="请输入验证码"
-          name="code"
+          name="imageCode"
           type="text"
           tabindex="3"
           auto-complete="on"
@@ -64,7 +64,7 @@
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
       <!-- <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
+        <span style="margin-right:20px;">account: admin</span>
         <span> password: any</span>
       </div> -->
 
@@ -74,7 +74,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
-import { getCode,login } from '@/api/user'
+import { getCode } from '@/api/user'
 import axios from 'axios';
 
 export default {
@@ -103,14 +103,14 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '123455',
-        code: "",
+        account: 'admin',
+        password: '654321',
+        imageCode: "",
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        account: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }],
-        code: [{ required: true, trigger: 'blur', validator: validateCode }],
+        imageCode: [{ required: true, trigger: 'blur', validator: validateCode }],
       },
       loading: false,
       passwordType: 'password',
@@ -156,7 +156,7 @@ export default {
     getCodeFun(){
       var that = this;
       var params = {
-        uuid: that.generateRandomString()
+        sessionUUID: that.generateRandomString()
       }
       getCode(params).then(res=>{
         console.log(res)
@@ -191,7 +191,8 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.loginForm.uuid = that.uuid
+          this.loginForm.sessionUUID = that.uuid
+          console.log(this.loginForm)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
