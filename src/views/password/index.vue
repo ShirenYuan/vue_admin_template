@@ -2,73 +2,80 @@
   <div class="home_page">
     <el-header height="40px">
       <el-row :gutter="20">
-        <el-col :span="6"><div class="grid-content bg-purple"></div></el-col>
-        <el-col :span="6"><div class="grid-content bg-purple"></div></el-col>
-        <el-col :span="6"><el-button type="primary" @click="dialogFormVisible2 = true">新建资源</el-button></el-col>
         <el-col :span="6"><el-button type="primary" @click="dialogFormVisible = true">修改资源密码</el-button></el-col>
       </el-row>
     </el-header>
     <el-table
+      height="600"
+      v-if="tableData.length>0"
       :data="tableData"
       stripe
       style="width: 100%">
       <el-table-column
-        prop="name"
+        prop="menuName"
         label="资源名称"
         width="180">
       </el-table-column>
       <el-table-column
-        prop="date"
-        label="创建时间"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="address"
+        prop="infoPath"
         label="详情图">
         <template slot-scope="scope">
           <el-image
           style="width: 100px; height: 100px"
-          :src="url"
-          :fit="fit"></el-image>
-          <!-- <el-button
-            size="mini"
-            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
+          :src="tableData[scope.$index].infoZipPath"
+          :preview-src-list="[tableData[scope.$index].infoPath]"
+          ></el-image>
         </template>
       </el-table-column>
       <el-table-column
-        prop="address"
+        prop="anglePath"
         label="方位图">
         <template slot-scope="scope">
           <el-image
           style="width: 100px; height: 100px"
-          :src="url"
-          :fit="fit"></el-image>
+          :src="tableData[scope.$index].angleZipPath"
+          :preview-src-list="[tableData[scope.$index].anglePath]"
+          ></el-image>
         </template>
       </el-table-column>
       <el-table-column
-        prop="address"
+        prop="musicPath"
         label="背景音乐">
         <template slot-scope="scope">
           <el-button
+            v-if="tableData[scope.$index].musicPath && !tableData[scope.$index].isPlaying"
             size="mini"
-            @click="handleEdit(scope.$index, scope.row)">试听</el-button>
+            @click="playMusic(scope.$index, scope.row)">试听
+          </el-button>
+          <el-button
+            v-else-if="tableData[scope.$index].musicPath && tableData[scope.$index].isPlaying"
+            size="mini"
+            @click="pauseMusic(scope.$index)">暂停
+          </el-button>
+          <el-button size="mini">
+            <el-upload
+              class="avatar-uploader"
+              action="http://101.37.24.92/shen-hua/action/uploadMusic"
+              :data="{'id':tableData[scope.$index].id}"
+              :headers="headers"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload">
+              上传
+            </el-upload>
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column
-        prop="address"
-        label="详情图">
+        label="是否加密">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <div @click="changeValue(scope.$index,scope.row)">
+            <el-switch
+              :value="tableData[scope.$index].encrypt"
+              active-color="#13ce66"
+              inactive-color="#f0f0f0">
+            </el-switch>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -78,96 +85,28 @@
         <el-form-item label="旧密码" prop="pass" required>
           <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="新密码" prop="checkPass" required>
-          <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+        <el-form-item label="新密码" prop="newPass" required>
+          <el-input type="password" v-model="ruleForm.newPass" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="确认新密码" prop="age" required>
-          <el-input v-model.number="ruleForm.age"></el-input>
+        <el-form-item label="确认新密码" prop="checkPass" required>
+          <el-input type="password" v-model="ruleForm.checkPass"></el-input>
         </el-form-item>
-        <!-- <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
-          <el-button @click="resetForm('ruleForm')">重置</el-button>
-        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">重置</el-button>
         <el-button type="primary" @click="dialogFormVisible = false">提交</el-button>
       </div>
     </el-dialog>
-    <!-- 新建资源 -->
-    <el-dialog title="新建资源" :visible.sync="dialogFormVisible2">
-      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="passworddialog">
-        <el-form-item label="资源名称" prop="pass" required>
-          <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="详情图片" prop="checkPass" required>
-          <el-upload
-            class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="方位图片" prop="age" required>
-          <el-upload
-            class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="背景音乐" prop="age">
-          <el-upload
-            class="upload-demo"
-            drag
-            action="https://jsonplaceholder.typicode.com/posts/"
-            multiple>
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-          </el-upload>
-        </el-form-item>
-        <!-- <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
-          <el-button @click="resetForm('ruleForm')">重置</el-button>
-        </el-form-item> -->
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible2 = false">取消</el-button>
-        <el-button type="primary" @click="dialogFormVisible2 = false">提交</el-button>
-      </div>
-    </el-dialog>
-    
   </div>
 </template>
 
 <script>
+import {getMenu,updateEncrypt} from '@/api/api';
+import { getToken } from '@/utils/auth'
+import { MessageBox, Message } from 'element-ui'
 export default {
     data() {
-      
-      var checkAge = (rule, value, callback) => {
-        if (!value) {
-          return callback(new Error('年龄不能为空'));
-        }
-        setTimeout(() => {
-          if (!Number.isInteger(value)) {
-            callback(new Error('请输入数字值'));
-          } else {
-            if (value < 18) {
-              callback(new Error('必须年满18岁'));
-            } else {
-              callback();
-            }
-          }
-        }, 1000);
-      };
-      var validatePass = (rule, value, callback) => {
+      var passValidator = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入密码'));
         } else {
@@ -177,85 +116,136 @@ export default {
           callback();
         }
       };
-      var validatePass2 = (rule, value, callback) => {
+      var newPassValidator = (rule, value, callback) => {
+        if (!value) {
+          return callback(new Error('新密码不能为空'));
+        }else if(value.length<6){
+          return callback(new Error('新密码不能少于6位'));
+        }else {
+          callback();
+        }
+      };
+      
+      var CheckNewPassvalidatePass = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请再次输入密码'));
-        } else if (value !== this.ruleForm.pass) {
+        } else if (value !== this.ruleForm.newPass) {
           callback(new Error('两次输入密码不一致!'));
         } else {
           callback();
         }
       };
       return {
-        tableData: [{
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        }, {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1516 弄'
-        }],
+        headers: {'Authorization':"Bearer "+ getToken()},
+        tableData: [],
         ruleForm: {
           pass: '',
+          newPass: '',
           checkPass: '',
-          age: ''
         },
         rules: {
           pass: [
-            { validator: validatePass, trigger: 'blur' }
+            { validator: passValidator, trigger: 'blur' }
+          ],
+          newPass: [
+            { validator: newPassValidator, trigger: 'blur' }
           ],
           checkPass: [
-            { validator: validatePass2, trigger: 'blur' }
-          ],
-          age: [
-            { validator: checkAge, trigger: 'blur' }
+            { validator: CheckNewPassvalidatePass, trigger: 'blur' }
           ]
         },
-        fits: ['fill', 'contain', 'cover', 'none', 'scale-down'],
-        url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
         dialogFormVisible: false,
-        dialogFormVisible2: false,
-        imageUrl: '',
+        // 记录当前正在播放的音频索引
+        currentPlayingIndex: null,
       };
     },
+    mounted(){
+      this.getMenuFun()
+    },
     methods: {
-      submitForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            alert('submit!');
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
+      changeValue(index,row){
+        var that = this;
+        that.tableData[index].encrypt = !that.tableData[index].encrypt
+        var encrypt = that.tableData[index].encrypt
+        var id = that.tableData[index].id
+        var params = {
+          encrypt,
+          id
+        }
+        updateEncrypt(params).then(res=>{
+          console.log(res)
+        })
       },
-      resetForm(formName) {
-        this.$refs[formName].resetFields();
+      playMusic(index, row) {
+        if (row.musicPath) {
+          const audio = new Audio(row.musicPath);
+
+          audio.addEventListener('ended', () => {
+            audio.remove();
+            this.$set(this.tableData, index, { ...row, isPlaying: false, audioInstance: null });
+            this.currentPlayingIndex = null;
+          });
+
+          // 如果有其他音频正在播放，暂停它
+          if (this.currentPlayingIndex !== null) {
+            this.pauseMusic(this.currentPlayingIndex);
+          }
+
+          audio.play();
+
+          this.$set(this.tableData, index, { ...row, isPlaying: true, audioInstance: audio });
+          this.currentPlayingIndex = index;
+        } else {
+          this.$message.error('当前行没有音乐路径！');
+        }
+      },
+
+      pauseMusic(index) {
+        const audioInstance = this.tableData[index].audioInstance;
+
+        if (audioInstance) {
+          audioInstance.pause();
+          this.$set(this.tableData, index, { ...this.tableData[index], isPlaying: false });
+        }
       },
       handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
+        Message({
+          message: "上传成功",
+          type:"success",
+        })
+        this.getMenuFun()
       },
       beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg';
-        const isLt2M = file.size / 1024 / 1024 < 2;
+        console.log(file)
+        console.log(file.type)
+        const isMp3 = file.type === 'audio/mpeg';
+        // const isLt2M = file.size / 1024 / 1024 < 2;
 
-        if (!isJPG) {
-          this.$message.error('上传头像图片只能是 JPG 格式!');
+        if (!isMp3) {
+          this.$message.error('上传音乐只能是 mp3 格式!');
         }
-        if (!isLt2M) {
-          this.$message.error('上传头像图片大小不能超过 2MB!');
+        // if (!isLt2M) {
+        //   this.$message.error('上传头像图片大小不能超过 2MB!');
+        // }
+        return isMp3;
+      },
+      handleEdit(index, row) {
+        console.log(index, row);
+      },
+      handleDelete(index, row) {
+        console.log(index, row);
+      },
+      getMenuFun(){
+        var that = this;
+        var params = {
+
         }
-        return isJPG && isLt2M;
-      }
+        getMenu(params).then(res=>{
+          console.log(res.data[0].childMenu)
+          that.tableData = res.data[0].childMenu
+        })
+      },
+      
     }
   }
 </script>

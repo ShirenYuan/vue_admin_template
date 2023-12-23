@@ -1,33 +1,17 @@
 <template>
   <div class="home_page">
-    <el-form class="home_page_ul" ref="form" :model="form" label-width="120px">
-      <el-form-item label="弹幕开关">
-        <el-switch
-          v-model="value"
-          active-color="#13ce66"
-          inactive-color="#f0f0f0">
-        </el-switch>
-      </el-form-item>
-
-      <el-form-item label="公告栏开关">
-        <el-switch
-          v-model="value"
-          active-color="#13ce66"
-          inactive-color="#f0f0f0">
-        </el-switch>
-      </el-form-item>
-      
+    <el-form class="home_page_ul" ref="form" label-width="120px">
       <el-form-item label="编辑公告">
         <el-input
           type="textarea"
           :rows="2"
           placeholder="请输入内容"
-          v-model="textarea">
+          v-model="textareaStr">
         </el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
+        <el-button type="primary" @click="addNoticeFun()">提交</el-button>
+        <el-button @click="resetForm()">重置</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -35,13 +19,47 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { addNotice,getMenu } from '@/api/api'
+import { MessageBox, Message } from 'element-ui'
 
 export default {
   name: 'Dashboard',
   computed: {
     ...mapGetters([
-      'name'
+      'logoPath',
+      'notice',
     ])
+  },
+  data(){
+    return {
+      danmuValue: false,
+      noticeValue: false,
+      textareaStr: "",
+    }
+  },
+  mounted(){
+    this.textareaStr = this.notice
+    console.log(this.notice)
+    console.log(this.logoPath)
+  },
+  methods:{
+    resetForm(){
+      this.textareaStr = ""
+    },
+    
+    addNoticeFun(){
+      var that = this
+      var params = {
+        notice: that.textareaStr
+      }
+      addNotice(params).then(res=>{
+        console.log(res)
+        Message(res.message)
+      }).catch(err=>{
+        Message(err.message)
+
+      })
+    }
   }
 }
 </script>

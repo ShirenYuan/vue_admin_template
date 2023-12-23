@@ -40,27 +40,29 @@
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
-
-      <el-form-item prop="imageCode">
-        <!-- <span class="svg-container">
-          <svg-icon icon-class="imageCode" />
-        </span> -->
-        <el-input
-          ref="imageCode"
-          v-model="loginForm.imageCode"
-          placeholder="请输入验证码"
-          name="imageCode"
-          type="text"
-          tabindex="3"
-          auto-complete="on"
-        />
-
-      </el-form-item>
-      <div style="display: flex;color: #fff;line-height: 1;align-items: center;margin-bottom: 20px;">
-        <div>验证码：</div>
-        <img :src="imageData" alt="" @click="getCaptcha()">
+      <div style="display: flex;justify-content: space-between;">
+        <div style="width: 80%;">
+          <el-form-item prop="imageCode">
+            <!-- <span class="svg-container">
+              <svg-icon icon-class="imageCode" />
+            </span> -->
+            <el-input
+              ref="imageCode"
+              v-model="loginForm.imageCode"
+              placeholder="请输入验证码"
+              name="imageCode"
+              type="text"
+              tabindex="3"
+              auto-complete="on"
+            />
+          </el-form-item>
+        </div>
+        <div style="display: flex;color: #fff;line-height: 1;align-items: center;margin-bottom: 20px;">
+          <img style="cursor: pointer;" :src="imageData" alt="" @click="getCaptcha()">
+        </div>
       </div>
-
+      
+      
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
       <!-- <div class="tips">
@@ -194,6 +196,8 @@ export default {
           this.loginForm.sessionUUID = that.uuid
           console.log(this.loginForm)
           this.$store.dispatch('user/login', this.loginForm).then(() => {
+            console.log("登陆成功")
+            console.log(this.redirect)
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch(() => {

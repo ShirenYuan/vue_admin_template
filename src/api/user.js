@@ -23,9 +23,25 @@ export function getCode(data) {
   })
 }
 
+export function updateUserPassword(data) {
+  return request({
+    url: '/shen-hua/action/updateUserPassword',
+    method: 'post',
+    data
+  })
+}
+
+// export function getInfo(token) {
+//   return request({
+//     url: '/vue-admin-template/user/info',
+//     method: 'get',
+//     params: { token }
+//   })
+// }
+
 export function getInfo(token) {
   return request({
-    url: '/vue-admin-template/user/info',
+    url: '/shen-hua/show/getLogoAndNotice',
     method: 'get',
     params: { token }
   })
