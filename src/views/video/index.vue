@@ -7,8 +7,8 @@
     </el-header>
     <el-table
       height="600"
-      v-if="tableData.length>0"
-      :data="tableData"
+      v-if="formattedTableData.length>0"
+      :data="formattedTableData"
       stripe
       style="width: 100%">
       <el-table-column
@@ -75,10 +75,33 @@ export default {
         currentVideoPath: '',
       };
     },
+    computed: {
+      // 计算属性，将时间戳格式化为日期字符串
+      formattedTableData() {
+        return this.tableData.map(item => {
+          return {
+            ...item,
+            createTime: this.formatTimestampToDate(item.createTime),
+          };
+        });
+      },
+    },
     mounted(){
       this.getVideoListFun()
     },
     methods: {
+      // 辅助方法，将时间戳格式化为日期字符串
+      formatTimestampToDate(timestamp) {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+
+        return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+      },
       previewVideo(row) {
         if (row.videoUrl) {
           // 设置当前视频路径
