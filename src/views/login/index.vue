@@ -33,7 +33,7 @@
           placeholder="请输入密码"
           name="password"
           tabindex="2"
-          auto-complete="on"
+          auto-complete="off"
           @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
@@ -53,7 +53,7 @@
               name="imageCode"
               type="text"
               tabindex="3"
-              auto-complete="on"
+              auto-complete="off"
               @keyup.enter.native="handleLogin"
             />
           </el-form-item>
@@ -106,8 +106,8 @@ export default {
     }
     return {
       loginForm: {
-        account: 'admin',
-        password: '654321',
+        account: 'CHN-ENERGY',
+        password: '',
         imageCode: "",
       },
       loginRules: {
@@ -156,15 +156,6 @@ export default {
         console.error('获取图形验证码失败', error);
       }
     },
-    getCodeFun(){
-      var that = this;
-      var params = {
-        sessionUUID: that.generateRandomString()
-      }
-      getCode(params).then(res=>{
-        console.log(res)
-      })
-    },
     loginFun(){
 
     },
@@ -203,6 +194,8 @@ export default {
             this.loading = false
           }).catch(() => {
             this.loading = false
+            that.getCaptcha()
+            that.loginForm.imageCode = ""
           })
         } else {
           console.log('error submit!!')

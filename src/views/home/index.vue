@@ -9,6 +9,25 @@
           style="width: 100px; height: 100px"
           :src="logoPath"></el-image>
       </el-form-item>
+      <el-form-item label="主页背景音乐:">
+        <div class="home_page_ul_li_right">{{ info.fileName }}</div>
+        <template v-if="info.homeMusic">
+          <el-button v-if="!isPlayFlag" size="mini" @click="playMusic">试听</el-button>
+          <el-button v-else size="mini" @click="pauseMusic">暂停</el-button>
+          <el-button size="mini" type="warning" @click="deleteMusic()">删除</el-button>
+        </template>
+        <el-button v-else size="mini">
+          <el-upload
+            class="avatar-uploader"
+            action="http://101.37.24.92/shen-hua/action/uploadHomeMusic"
+            :headers="headers"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccessMusic"
+            :before-upload="beforeAvatarUploadMusic">
+            上传
+          </el-upload>
+        </el-button>
+      </el-form-item>
       <el-form-item label="上传公司logo:">
         <div style="width: 178px;height: 178px;border-radius: 6px;border: 1px dashed #d9d9d9;">
           <el-upload
@@ -31,6 +50,8 @@
 import { mapGetters } from 'vuex'
 import { getToken } from '@/utils/auth'
 import { MessageBox, Message } from 'element-ui'
+import { getInfo } from "@/api/user"
+import { deleteHomeMusic, uploadHomeMusic } from "@/api/api"
 
 export default {
   name: 'Dashboard',
@@ -39,7 +60,13 @@ export default {
       fits: ['fill', 'contain', 'cover', 'none', 'scale-down'],
       url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
       imageUrl: '',
-      headers: {'Authorization':"Bearer "+ getToken()}
+      headers: {'Authorization':"Bearer "+ getToken()},
+      info: {
+        homeMusic: "",
+        fileName: "",
+      },
+      isPlayFlag: false,
+      audio: new Audio(),
     }
   },
   computed: {
@@ -48,7 +75,87 @@ export default {
       "name"
     ])
   },
+  mounted(){
+    this.getInfoFun()
+  },
   methods: {
+    playMusic() {
+      // Set the source of the audio element to the music URL
+      this.audio.src = this.info.homeMusic;
+      // Play the audio
+      this.audio.play();
+      this.isPlayFlag = true; // Set the play flag to true
+    },
+
+    pauseMusic() {
+      // Pause the audio
+      this.audio.pause();
+      this.isPlayFlag = false; // Set the play flag to false
+    },
+    deleteMusic() {
+      // Implement your delete music logic here
+      // Stop the audio when deleting
+      this.audio.pause();
+      this.isPlayFlag = false; // Set the play flag to false
+
+      this.$confirm('此操作将永久删除该音乐文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteHomeMusic().then(res=>{
+          console.log(res)
+          if(res.code=="200"){
+            Message({
+              type: "success",
+              message: "删除成功"
+            })
+            this.getInfoFun()
+          }
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      });
+    },
+    handleAvatarSuccessMusic(res, file) {
+      Message({
+        message: "上传成功",
+        type:"success",
+      })
+      this.getInfoFun()
+    },
+    beforeAvatarUploadMusic(file) {
+      console.log(file)
+      console.log(file.type)
+      const isMp3 = file.type === 'audio/mpeg';
+      // const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isMp3) {
+        this.$message.error('上传音乐只能是 mp3 格式!');
+      }
+      // if (!isLt2M) {
+      //   this.$message.error('上传头像图片大小不能超过 2MB!');
+      // }
+      return isMp3;
+    },
+    getInfoFun(){
+      var that = this;
+      var params = {
+
+      }
+      getInfo(params).then(res=>{
+        console.log(res)
+        if(res.code=="200"){
+          const urlParts = res.data.homeMusic.split("/");
+          const fileName = urlParts[urlParts.length - 1];
+          that.info = res.data
+          that.info.fileName = fileName
+        }
+      })
+    },
     handleAvatarSuccess(res, file) {
       this.imageUrl = URL.createObjectURL(file.raw);
       Message({

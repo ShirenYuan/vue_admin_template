@@ -21,6 +21,16 @@
         label="创建时间">
       </el-table-column>
       <el-table-column
+        prop="videoPreviewUrl"
+        label="预览图">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 100px; height: 100px"
+            :src="scope.row.videoPreviewUrl"
+            ></el-image>
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="musicPath"
         label="操作">
         <template slot-scope="scope">

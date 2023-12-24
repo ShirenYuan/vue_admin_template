@@ -2,7 +2,7 @@
   <div class="home_page">
     <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="home_page_ul">
       <el-form-item label="用户名" prop="name">
-        <div>admin</div>
+        <div>CHN-ENERGY</div>
       </el-form-item>
       <el-form-item label="旧密码" prop="pass">
         <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
@@ -24,6 +24,7 @@
 <script>
 import {updateUserPassword} from "@/api/user"
 import { MessageBox, Message } from 'element-ui'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 export default {
     data() {
       var passValidator = (rule, value, callback) => {
@@ -87,11 +88,8 @@ export default {
             message: res.message,
             type: 'success'
           })
-        }).catch(err=>{
-          Message({
-            message: err.message,
-            type: err
-          })
+          removeToken() // must remove  token  first
+          this.$router.push(`/login`)
         })
       },
       submitForm(formName) {

@@ -6,7 +6,7 @@
       </el-row>
     </el-header>
     <el-table
-      height="600"
+      height="85vh"
       v-if="tableData.length>0"
       :data="tableData"
       stripe
@@ -18,13 +18,31 @@
       </el-table-column>
       <el-table-column
         prop="infoPath"
-        label="详情图">
+        label="详情图"
+        width="200px"
+        >
         <template slot-scope="scope">
-          <el-image
-          style="width: 100px; height: 100px"
-          :src="tableData[scope.$index].infoZipPath"
-          :preview-src-list="[tableData[scope.$index].infoPath]"
-          ></el-image>
+          <div style="display: flex; align-items: center;"> 
+            <el-image
+              style="width: 100px; height: 100px"
+              :src="tableData[scope.$index].infoZipPath"
+              :preview-src-list="[tableData[scope.$index].infoPath]"
+              ></el-image>
+              <div style="margin-left: 10px;">
+                <el-button size="mini" @click="pauseMusic(scope.$index)">
+                  <el-upload
+                    class="avatar-uploader"
+                    action="http://101.37.24.92/shen-hua/action/uploadInfo"
+                    :headers="headers"
+                    :data="{'id':tableData[scope.$index].id}"
+                    :show-file-list="false"
+                    :on-success="handleAvatarSuccessImg"
+                    :before-upload="beforeAvatarUploadImg">
+                    替换
+                  </el-upload>
+                </el-button>
+              </div>
+          </div>
         </template>
       </el-table-column>
       <el-table-column
@@ -52,7 +70,7 @@
             size="mini"
             @click="pauseMusic(scope.$index)">暂停
           </el-button>
-          <el-button size="mini">
+          <el-button size="mini" v-if="!tableData[scope.$index].musicPath">
             <el-upload
               class="avatar-uploader"
               action="http://101.37.24.92/shen-hua/action/uploadMusic"
@@ -63,6 +81,12 @@
               :before-upload="beforeAvatarUpload">
               上传
             </el-upload>
+          </el-button>
+          <el-button
+            v-else
+            size="mini"
+            type="warning"
+            @click="deleteMusicFun(scope.$index, scope.row)">删除
           </el-button>
         </template>
       </el-table-column>
@@ -93,15 +117,15 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">重置</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">提交</el-button>
+        <!-- <el-button @click="clearFrom()">清空</el-button> -->
+        <el-button type="primary" @click="updateFilePasswordFun()">提交</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import {getMenu,updateEncrypt} from '@/api/api';
+import {getMenu,updateEncrypt,updateFilePassword,deleteMusic} from '@/api/api';
 import { getToken } from '@/utils/auth'
 import { MessageBox, Message } from 'element-ui'
 export default {
@@ -110,19 +134,31 @@ export default {
         if (value === '') {
           callback(new Error('请输入密码'));
         } else {
-          if (this.ruleForm.checkPass !== '') {
-            this.$refs.ruleForm.validateField('checkPass');
+          // 使用正则表达式验证是否为数字
+          const pattern = /^\d+$/;
+          if (!pattern.test(value)) {
+            callback(new Error('密码只能是数字'));
+          } else {
+            if (this.ruleForm.checkPass !== '') {
+              this.$refs.ruleForm.validateField('checkPass');
+            }
+            callback();
           }
-          callback();
         }
       };
       var newPassValidator = (rule, value, callback) => {
         if (!value) {
           return callback(new Error('新密码不能为空'));
-        }else if(value.length<6){
+        } else if (value.length < 6) {
           return callback(new Error('新密码不能少于6位'));
-        }else {
-          callback();
+        } else {
+          // 使用正则表达式验证是否为数字
+          const pattern = /^\d+$/;
+          if (!pattern.test(value)) {
+            return callback(new Error('新密码只能是数字'));
+          } else {
+            callback();
+          }
         }
       };
       
@@ -163,6 +199,64 @@ export default {
       this.getMenuFun()
     },
     methods: {
+      deleteMusicFun(index,row){
+        var that = this;
+        console.log(row)
+        this.$confirm('此操作将永久删除该音乐文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var params = {
+            id: row.id,
+          }
+          deleteMusic(params).then(res=>{
+            console.log(res)
+            if(res.code=="200"){
+              Message({
+                type: "success",
+                message: "删除成功",
+              })
+              that.getMenuFun()
+            }
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+      },
+      clearFrom(){
+        var that = this
+        that.ruleForm.pass = "" 
+        that.ruleForm.newPass = "" 
+        that.ruleForm.checkPass = "" 
+      },
+      updateFilePasswordFun(){
+        var that = this;
+        var params={
+          newPassword: that.ruleForm.newPass,
+          oldPassword: that.ruleForm.pass
+        }
+        console.log(params)
+        // return
+        updateFilePassword(params).then(res=>{
+          console.log(res)
+          if(res.code == "200"){
+            Message({
+              message: "修改成功",
+              type:"success",
+            })
+            that.dialogFormVisible = false
+          }else{
+            Message({
+              message: res.message,
+              type: error
+            })
+          }
+        })
+      },
       changeValue(index,row){
         var that = this;
         that.tableData[index].encrypt = !that.tableData[index].encrypt
@@ -174,6 +268,10 @@ export default {
         }
         updateEncrypt(params).then(res=>{
           console.log(res)
+          Message({
+            message: "操作",
+            type:"success",
+          })
         })
       },
       playMusic(index, row) {
@@ -229,6 +327,27 @@ export default {
         // }
         return isMp3;
       },
+      handleAvatarSuccessImg(res, file) {
+        this.imageUrl = URL.createObjectURL(file.raw);
+        Message({
+          message: '上传成功',
+          type: 'success'
+        })
+        this.getMenuFun()
+      },
+      beforeAvatarUploadImg(file) {
+        console.log(file)
+        const isJPG = file.type === 'image/jpeg'||'image/jpg'||'image/png';
+        // const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传图片只能是 JPG或者png 格式!');
+        }
+        // if (!isLt2M) {
+        //   this.$message.error('上传头像图片大小不能超过 2MB!');
+        // }
+        return isJPG;
+      },
       handleEdit(index, row) {
         console.log(index, row);
       },
@@ -242,7 +361,7 @@ export default {
         }
         getMenu(params).then(res=>{
           console.log(res.data[0].childMenu)
-          that.tableData = res.data[0].childMenu
+          that.tableData = [...res.data[0].childMenu,...res.data[1].childMenu]
         })
       },
       

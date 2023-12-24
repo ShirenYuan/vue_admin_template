@@ -42,3 +42,31 @@ export function deleteVideo(params) {
     params
   })
 } 
+export function deleteMusic(params) {
+  return request({
+    url: '/shen-hua/action/deleteMusic',
+    method: 'get',
+    params
+  })
+} 
+export function deleteHomeMusic(params) {
+  return request({
+    url: '/shen-hua/action/deleteHomeMusic',
+    method: 'get',
+    params
+  })
+} 
+export function uploadHomeMusic(data) {
+  return request({
+    url: '/shen-hua/action/uploadHomeMusic',
+    method: 'post',
+    data
+  })
+} 
+export function updateFilePassword(data) {
+  return request({
+    url: '/shen-hua/action/updateFilePassword',
+    method: 'post',
+    data
+  })
+} 
