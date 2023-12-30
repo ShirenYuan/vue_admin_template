@@ -32,7 +32,7 @@
                 <el-button size="mini" @click="pauseMusic(scope.$index)">
                   <el-upload
                     class="avatar-uploader"
-                    action="http://101.37.24.92/shen-hua/action/uploadInfo"
+                    action="http://localhost:8090/shen-hua/action/uploadInfo"
                     :headers="headers"
                     :data="{'id':tableData[scope.$index].id}"
                     :show-file-list="false"
@@ -73,7 +73,7 @@
           <el-button size="mini" v-if="!tableData[scope.$index].musicPath">
             <el-upload
               class="avatar-uploader"
-              action="http://101.37.24.92/shen-hua/action/uploadMusic"
+              action="http://localhost:8090/shen-hua/action/uploadMusic"
               :data="{'id':tableData[scope.$index].id}"
               :headers="headers"
               :show-file-list="false"

@@ -141,7 +141,7 @@ export default {
       var uuid = that.generateRandomString()
       that.uuid = uuid
       try {
-        const response = await axios.get('http://101.37.24.92/shen-hua/show/captcha.jpg', {
+        const response = await axios.get('http://localhost:8090/shen-hua/show/captcha.jpg', {
           params: {
             uuid: uuid
           },

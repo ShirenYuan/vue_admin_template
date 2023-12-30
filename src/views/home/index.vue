@@ -19,7 +19,7 @@
         <el-button v-else size="mini">
           <el-upload
             class="avatar-uploader"
-            action="http://101.37.24.92/shen-hua/action/uploadHomeMusic"
+            action="http://localhost:8090/shen-hua/action/uploadHomeMusic"
             :headers="headers"
             :show-file-list="false"
             :on-success="handleAvatarSuccessMusic"
@@ -32,7 +32,7 @@
         <div style="width: 178px;height: 178px;border-radius: 6px;border: 1px dashed #d9d9d9;">
           <el-upload
             class="avatar-uploader"
-            action="http://101.37.24.92/shen-hua/action/upload"
+            action="http://localhost:8090/shen-hua/action/upload"
             :headers="headers"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"

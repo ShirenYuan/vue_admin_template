@@ -49,7 +49,7 @@
           <div style="width: 178px;height: 178px;border: dashed 1px #333;" @click="chickVideoName()">
             <el-upload
               class="avatar-uploader"
-              action="http://101.37.24.92/shen-hua/action/uploadVideo"
+              action="http://localhost:8090/shen-hua/action/uploadVideo"
               :show-file-list="false"
               :data="{'videoName':videoName}"
               :headers="headers"

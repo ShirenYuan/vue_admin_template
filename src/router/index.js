@@ -66,18 +66,18 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/menuList',
-    component: Layout,
-    children: [
-      {
-        path: 'menuList',
-        name: 'menuList',
-        component: () => import('@/views/menuList/index'),
-        meta: { title: '开关管理', icon: 'password' }
-      }
-    ]
-  },
+  // {
+  //   path: '/menuList',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'menuList',
+  //       name: 'menuList',
+  //       component: () => import('@/views/menuList/index'),
+  //       meta: { title: '开关管理', icon: 'password' }
+  //     }
+  //   ]
+  // },
   {
     path: '/password',
     component: Layout,

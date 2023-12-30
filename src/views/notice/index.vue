@@ -1,6 +1,15 @@
 <template>
   <div class="home_page">
     <el-form class="home_page_ul" ref="form" label-width="120px">
+      <el-form-item label="公告栏开关">
+        <div @click="changeValue('7')">
+          <el-switch
+            :value="noticeValue"
+            active-color="#13ce66"
+            inactive-color="#f0f0f0">
+          </el-switch>
+        </div>
+      </el-form-item>
       <el-form-item label="编辑公告">
         <el-input
           type="textarea"
@@ -19,7 +28,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { addNotice,getMenu } from '@/api/api'
+import { addNotice,getMenu,toggleMenu } from '@/api/api'
 import { MessageBox, Message } from 'element-ui'
 
 export default {
@@ -35,14 +44,55 @@ export default {
       danmuValue: false,
       noticeValue: false,
       textareaStr: "",
+      danmuValue: false,
+      noticeValue: false,
     }
   },
   mounted(){
     this.textareaStr = this.notice
+    this.getMenuFun()
     console.log(this.notice)
     console.log(this.logoPath)
   },
   methods:{
+    getMenuFun(){
+      var that = this;
+      var params = {
+
+      }
+      getMenu(params).then(res=>{
+        console.log(res.data)
+        for(let i=0;i<res.data.length;i++){
+          if(res.data[i].id=="4"){
+            // 留言弹幕
+            that.danmuValue = res.data[i].isDisplay
+          }
+          if(res.data[i].id=="7"){
+            // 公告栏
+            that.noticeValue = res.data[i].isDisplay
+          }
+        }
+      })
+    },
+    changeValue(id){
+      var that = this;
+      var toggle = null
+      if(id=="7"){
+        that.noticeValue = !that.noticeValue
+        toggle = that.noticeValue
+      }
+      var params = {
+        id,
+        toggle
+      }
+      toggleMenu(params).then(res=>{
+        console.log(res)
+        Message(res.message)
+      }).catch(err=>{
+        Message(err.message)
+
+      })
+    },
     resetForm(){
       this.textareaStr = ""
     },
